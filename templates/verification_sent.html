@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verification Sent</title>
+    <script>
+        // Sprawdź warunek tylko wtedy, gdy email_verified jest równy 'true'
+        {% if email_verified|lower == 'true' %}
+            setTimeout(function() {
+                window.location.href = '/login';
+            }, 5000); // Przekierowanie po 5 sekundach
+        {% endif %}
+    </script>
+</head>
+<body>
+    <h1>Email verification sent</h1>
+    {% if email_verified|lower == 'true' %}
+        <p>Your email has been verified.</p>
+    {% else %}
+        <p>Your email has not been verified yet.</p>
+        <p>Check your inbox for the verification link.</p>
+    {% endif %}
+    <!-- Reszta kodu HTML -->
+</body>
+</html>

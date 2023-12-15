@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rejestracja pracownika</title>
+</head>
+<body>
+<a href="/"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+    <h2>Rejestracja pracownika</h2>
+    <form method="POST">
+         {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(class="form-control") }}
+            {% for error in form.name.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.surname.label }}<br>
+            {{ form.surname(class="form-control") }}
+            {% for error in form.surname.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+         <p>{{ form.phone.label }}<br>{{ form.phone(class_='form-control', pattern="[0-9]{3}-[0-9]{3}-[0-9]{3}", oninput="this.value = this.value.replace(/[^0-9]/g, '')", placeholder="+48") }}
+         {% for error in form.phone.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+         </p>
+         <p>
+            {{ form.email.label }}<br>
+            {{ form.email(class="form-control") }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(class="form-control") }}
+            {% for error in form.password.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.confirm_password.label }}<br>
+            {{ form.confirm_password(class="form-control") }}
+            {% for error in form.confirm_password.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit }}</p>
+    </form>
+    <a href="/login">Logowanie</a>
+    <br/>
+    <a href="/register_employer">Zarejestruj jako firma</a>
+
+<script>
+        // Inicjalizacja automatycznego formatowania numeru telefonu
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phone');
+
+            phoneInput.addEventListener('input', function() {
+                let numbers = phoneInput.value.replace(/\D/g, '');
+                if (numbers.length > 0) {
+                    numbers = numbers.match(/(\d{0,3})(\d{0,3})(\d{0,3})/);
+                    phoneInput.value = !numbers[2] ? numbers[1] : numbers[1] + '-' + numbers[2] + (numbers[3] ? '-' + numbers[3] : '');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

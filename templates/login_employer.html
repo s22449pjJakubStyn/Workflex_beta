@@ -1,0 +1,24 @@
+<!-- login_employee.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logowanie firmy</title>
+</head>
+<body>
+<a href="/"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<h1>Logowanie firmy</h1>
+<form action="/login_employer" method="post">
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br>
+    <label for="password">Hasło:</label><br>
+    <input type="password" id="password" name="password" required><br>
+    <input type="submit" value="Zaloguj">
+</form>
+<a href="/register_main">Nie masz jeszcze konta? Zarejestruj się!</a>
+<br>
+<a href="/login_employer"> Zaloguj jako firma!</a>
+<br>
+<a href="/password_reset">Nie pamiętasz hasła? Kliknij tutaj</a>
+</body>
+</html>
