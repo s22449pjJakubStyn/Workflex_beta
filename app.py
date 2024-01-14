@@ -2,6 +2,8 @@ from functools import wraps
 
 from flask import Flask, render_template, request, redirect, session, url_for
 from forms import RegistrationEmployeeForm, RegistrationEmployerForm
+from google.auth.transport import requests
+from google.oauth2 import id_token
 
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
@@ -138,9 +140,7 @@ def email_exists_in_database(f):
             if request.referrer:
                 return redirect(request.referrer)
             else:
-                return redirect(url_for(
-                    'index'))  # lub dowolna inna strona, gdy nie ma informacji o stronie, z której przyszedł użytkownik
-
+                return redirect(url_for('index'))  # lub dowolna inna strona, gdy nie ma informacji o stronie, z której przyszedł użytkownik
     return decorated_function
 
 
@@ -150,7 +150,7 @@ def email_verified_in_database(f):
         try:
             user = auth.get_user_by_email(email)
             if user.email_verified:
-                return redirect(url_for('index'))
+                return redirect(url_for('login_main'))
             else:
                 return f(email)
         except auth.UserNotFoundError:
@@ -165,7 +165,7 @@ def sent_verification(email):
     return render_template('verification_sent.html', email=email)
 
 
-# Logowanie użytkownika
+# Moduł logowania pracownika
 @app.route('/login_employee', methods=['GET', 'POST'])
 def login_employee():
     if request.method == 'POST':
@@ -175,20 +175,24 @@ def login_employee():
         # Wykorzystaj Firebase Admin SDK do logowania użytkownika
         try:
             user = auth.get_user_by_email(email)
-            if user.email_verified:
-                session['user'] = {
-                    'email': email,
-                    'uid': user.uid
-                }
-                return redirect('/profile')
+            if is_employee(email):
+                if user.email_verified:
+                    session['user'] = {
+                        'email': email,
+                        'uid': user.uid,
+                        'role': 'Employee'
+                    }
+                    return redirect('/employee_main_page')
+                else:
+                    return render_template('verification_sent.html', email=email)
             else:
-                return render_template('verification_sent.html', email=email)
+                return render_template('login_employee.html', error_message='Próbowałeś zalogować się na konto firmy.')
         except Exception as e:
             return str(e)
     return render_template('login_employee.html')
 
 
-# Logowanie użytkownika
+# Moduł logowania pracodawcy
 @app.route('/login_employer', methods=['GET', 'POST'])
 def login_employer():
     if request.method == 'POST':
@@ -198,17 +202,38 @@ def login_employer():
         # Wykorzystaj Firebase Admin SDK do logowania użytkownika
         try:
             user = auth.get_user_by_email(email)
-            if user.email_verified:
-                session['user'] = {
-                    'email': email,
-                    'uid': user.uid
-                }
-                return redirect('/profile')
+            if is_employer(email):
+                if user.email_verified:
+                    session['user'] = {
+                        'email': email,
+                        'uid': user.uid,
+                        'role': 'Employee'
+                    }
+                    return redirect('/employer_main_page')
+                else:
+                    return render_template('verification_sent.html', email=email)
             else:
-                return render_template('verification_sent.html', email=email)
+                return render_template('login_employer.html', error_message='Próbowałeś zalogować się na konto pracownika.')
         except Exception as e:
             return str(e)
     return render_template('login_employer.html')
+
+
+# Funkcje pomocnicze sprawdzające rolę użytkownika
+def is_employee(email):
+    # Sprawdź, czy email należy do pracownika w Firebase (np. w kolekcji "Employee")
+    # Zwróć True, jeśli należy do pracownika, w przeciwnym razie False
+    # Poniżej znajdziesz przykładową implementację, którą trzeba dostosować do swojej bazy danych
+    employee_docs = db.collection('Employee').where('email', '==', email).stream()
+    return any(employee.exists for employee in employee_docs)
+
+
+def is_employer(email):
+    # Sprawdź, czy email należy do pracownika w Firebase (np. w kolekcji "Employee")
+    # Zwróć True, jeśli należy do pracownika, w przeciwnym razie False
+    # Poniżej znajdziesz przykładową implementację, którą trzeba dostosować do swojej bazy danych
+    employer_docs = db.collection('Company').where('email', '==', email).stream()
+    return any(employer.exists for employer in employer_docs)
 
 
 @app.route('/password_reset', methods=['GET', 'POST'])
@@ -243,12 +268,21 @@ def login_required(f):
     return decorated_function
 
 
-@app.route('/profile')
+@app.route('/employee_main_page')
 @login_required
-def profile():
+def employee_main_page():
     if 'user' in session:
         user = session['user']
-        return render_template('profile.html', user=user)
+        return render_template('employee_main_page.html', user=user)
+    return redirect('/login')
+
+
+@app.route('/employer_main_page')
+@login_required
+def employer_main_page():
+    if 'user' in session:
+        user = session['user']
+        return render_template('employer_main_page.html', user=user)
     return redirect('/login')
 
 

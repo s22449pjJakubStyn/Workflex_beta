@@ -7,7 +7,11 @@
 </head>
 <body>
 <a href="/"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+{% block content %}
 <h1>Logowanie firmy</h1>
+{% if error_message %}
+        <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
 <form action="/login_employer" method="post">
     <label for="email">Email:</label><br>
     <input type="email" id="email" name="email" required><br>
@@ -17,8 +21,9 @@
 </form>
 <a href="/register_main">Nie masz jeszcze konta? Zarejestruj się!</a>
 <br>
-<a href="/login_employer"> Zaloguj jako firma!</a>
+<a href="/login_employee"> Zaloguj jako pracownik!</a>
 <br>
 <a href="/password_reset">Nie pamiętasz hasła? Kliknij tutaj</a>
+{% endblock %}
 </body>
 </html>

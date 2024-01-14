@@ -6,7 +6,7 @@
         // Sprawdź warunek tylko wtedy, gdy email_verified jest równy 'true'
         {% if email_verified|lower == 'true' %}
             setTimeout(function() {
-                window.location.href = '/login';
+                window.location.href = '/login_main';
             }, 5000); // Przekierowanie po 5 sekundach
         {% endif %}
     </script>
