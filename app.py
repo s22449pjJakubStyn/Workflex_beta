@@ -2,8 +2,6 @@ from functools import wraps
 
 from flask import Flask, render_template, request, redirect, session, url_for
 from forms import RegistrationEmployeeForm, RegistrationEmployerForm
-from google.auth.transport import requests
-from google.oauth2 import id_token
 
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
@@ -118,6 +116,8 @@ def register_employer():
                 'phone': phone,
                 'status': status,
             })
+            workplace_ref = doc_ref.collection('Workplace').document('default')
+            workplace_ref.set({})
 
             msg = Message('Email verification', sender='your_email@example.com', recipients=[email])
             msg.body = f'Your email verification link: {verification_link}'
@@ -140,7 +140,9 @@ def email_exists_in_database(f):
             if request.referrer:
                 return redirect(request.referrer)
             else:
-                return redirect(url_for('index'))  # lub dowolna inna strona, gdy nie ma informacji o stronie, z której przyszedł użytkownik
+                return redirect(url_for(
+                    'index'))  # lub dowolna inna strona, gdy nie ma informacji o stronie, z której przyszedł użytkownik
+
     return decorated_function
 
 
@@ -213,7 +215,8 @@ def login_employer():
                 else:
                     return render_template('verification_sent.html', email=email)
             else:
-                return render_template('login_employer.html', error_message='Próbowałeś zalogować się na konto pracownika.')
+                return render_template('login_employer.html',
+                                       error_message='Próbowałeś zalogować się na konto pracownika.')
         except Exception as e:
             return str(e)
     return render_template('login_employer.html')
@@ -284,6 +287,74 @@ def employer_main_page():
         user = session['user']
         return render_template('employer_main_page.html', user=user)
     return redirect('/login')
+
+
+@app.route('/teams', methods=['GET', 'POST'])
+@login_required
+def teams():
+    error_message = None
+    team_names = []
+
+    try:
+        employer_uid = session.get('user', {}).get('uid')
+        teams_ref = db.collection('Company').document(employer_uid).collection('Workplace')
+        teams = teams_ref.stream()
+
+        # Pomijaj zespół o nazwie 'default' i sprawdzaj, czy istnieje pole 'Team name' i czy nie jest puste
+        team_names = sorted([team.to_dict().get('Team name') for team in teams if
+                             team.exists and team.to_dict().get('Team name') and team.to_dict().get(
+                                 'Team name') != 'default'])
+        app.logger.info("Team names retrieved: %s", team_names)
+
+    except Exception as e:
+        error_message = str(e)
+        app.logger.warning("Failed to retrieve team names. Error message: %s", error_message)
+
+    return render_template('teams.html', team_names=team_names, error_message=error_message)
+
+
+@app.route('/create_teams', methods=['GET', 'POST'])
+@login_required
+def create_teams():
+    error_message = None
+
+    if request.method == 'POST':
+        app.logger.debug("Request received for /create_teams")  # Dodaj log debugowania
+        team_name = request.form.get('team_name')
+        team_acronim_name = request.form.get('team_acronim_name')
+        team_description = request.form.get('team_description')
+        team_adres_street = request.form.get('team_adres_street')
+        team_adres_city = request.form.get('team_adres_city')
+        team_adres_postal_code = request.form.get('team_adres_postal_code')
+        team_phone = request.form.get('team_phone')
+        try:
+            employer_uid = session.get('user', {}).get('uid')
+            team_id = team_name
+
+            existing_team = db.collection('Company').document(employer_uid).collection(
+                'Workplace').document(team_name).get()
+            if existing_team.exists:
+                error_message = 'Zespół o danej nazwie już istnieje.'
+            else:
+                doc_ref = db.collection('Company').document(employer_uid).collection('Workplace').document(team_id)
+                doc_ref.set({
+                    'Team name': team_name,
+                    'Team acronim': team_acronim_name,
+                    'Team description': team_description,
+                    'Team street adress': team_adres_street,
+                    'Team city address': team_adres_city,
+                    'Team postal code address': team_adres_postal_code,
+                    'Team phone number': team_phone,
+                })
+                app.logger.info("Team created: %s", team_name)  # Dodaj ten log
+
+                return redirect(url_for('teams'))
+        except Exception as e:
+            error_message = str(e)
+            app.logger.error("Error while creating team: %s", error_message)
+
+    app.logger.warning("Form submission failed. Error message: %s", error_message)  # Dodaj ten log
+    return render_template('teams.html', error_message=error_message)
 
 
 @app.route('/logout')

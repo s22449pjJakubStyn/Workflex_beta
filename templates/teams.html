@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Twoje zespoły</title>
+</head>
+<body>
+<a href="/employer_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<!-- Przycisk do pokazania/ukrycia formularza -->
+<button id="createTeamButton">Utwórz Zespół</button>
+<br>
+<!-- Formularz ukryty na początku -->
+<form id="createTeamForm" method="POST" action="/create_teams" style="display: none;">
+    <!-- Dodaj pola formularza do tworzenia zespołu -->
+    <label for="team_name">Nazwa Zespołu:</label>
+    <input type="text" id="team_name" name="team_name" required>
+    <br>
+    <br>
+    <label for="team_acronim_name">Akronim zespołu:</label>
+    <input type="text" id="team_acronim_name" name="team_acronim_name" required>
+    <br>
+    <br>
+    <label for="team_description">Opis:</label>
+    <input type="text" id="team_description" name="team_description" required>
+    <br>
+    <br>
+    <label for="team_adres_street">Ulica:</label>
+    <input type="text" id="team_adres_street" name="team_adres_street" required>
+    <br>
+    <br>
+    <label for="team_adres_city">Miasto:</label>
+    <input type="text" id="team_adres_city" name="team_adres_city" required>
+    <br>
+    <br>
+    <label for="team_adres_postal_code">Kod pocztowy:</label>
+    <input type="text"  title="Please enter a Zip Code" pattern="^\s*?\d{5}(?:[-\s]\d{4})?\s*?$">
+    <br>
+    <br>
+    <label for="team_phone">Numer telefonu:</label>
+    <input type="text" id="team_phone" name="team_phone" required>
+    <br>
+    <br>
+    <button type="submit">Utwórz Zespół</button>
+</form>
+
+<!-- Wyświetlanie błędu -->
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+{% if team_names %}
+    <ul>
+        {% for team_name in team_names %}
+            <li>{{ team_name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Brak utworzonych zespołów.</p>
+{% endif %}
+
+<!-- ... -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const createTeamButton = document.getElementById('createTeamButton');
+        const createTeamForm = document.getElementById('createTeamForm');
+
+        // Po kliknięciu na przycisk pokaż/ukryj formularz
+        createTeamButton.addEventListener('click', function () {
+            if (createTeamForm.style.display === 'none') {
+                createTeamForm.style.display = 'block';
+                createTeamButton.textContent = 'Anuluj Tworzenie Zespołu';
+            } else {
+                createTeamForm.style.display = 'none';
+                createTeamButton.textContent = 'Utwórz Zespół';
+            }
+        });
+    });
+</script>
+</body>
+</html>
+
