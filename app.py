@@ -357,6 +357,14 @@ def create_teams():
     return render_template('teams.html', error_message=error_message)
 
 
+@app.route('/team/<team_name>')
+@login_required
+def team_main_page(team_name):
+    # Tutaj możesz dodać kod obsługujący stronę zespołu, np. pobieranie danych z bazy danych
+    # i przekazanie ich do szablonu
+    return render_template('team_main_page.html', team_name=team_name)
+
+
 @app.route('/logout')
 def logout():
     session.pop('user', None)

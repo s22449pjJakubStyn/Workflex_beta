@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ team_name }} - Strona zespołu</title>
+</head>
+<body>
+<h1>Witaj na stronie zespołu {{ team_name }}</h1>
+<!-- Tutaj możesz dodać inne informacje o zespole -->
+<a href="/employer_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<br>
+<a href="{{ url_for('teams') }}">< Wszystkie zespoły</a>
+<br>
+<a href="#"> Harmonogram</a>
+<br>
+<a href="#"> Ustawienia zespołu</a>
+<br>
+<a href="#">Pracownicy</a>
+<br>
+</body>
+</html>

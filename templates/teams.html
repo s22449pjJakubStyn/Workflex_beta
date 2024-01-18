@@ -51,7 +51,7 @@
 {% if team_names %}
     <ul>
         {% for team_name in team_names %}
-            <li>{{ team_name }}</li>
+            <li><a href="{{ url_for('team_main_page', team_name=team_name) }}">{{ team_name }}</a></li>
         {% endfor %}
     </ul>
 {% else %}
