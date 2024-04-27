@@ -3,9 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Twoje zespoły</title>
+    <script src="../static/script/search_script.js" defer></script>
 </head>
 <body>
 <a href="/employer_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<form id="searchForm">
+    <label for="global_search_query">Wyszukaj pracowników:</label>
+    <input type="text" id="global_search_query" name="query" required>
+</form>
+
+<!-- Wyświetl wyniki na bieżącej stronie -->
+<div id="searchResults"></div>
+<br>
 <!-- Przycisk do pokazania/ukrycia formularza -->
 <button id="createTeamButton">Utwórz Zespół</button>
 <br>
@@ -33,11 +42,19 @@
     <br>
     <br>
     <label for="team_adres_postal_code">Kod pocztowy:</label>
-    <input type="text"  title="Please enter a Zip Code" pattern="^\s*?\d{5}(?:[-\s]\d{4})?\s*?$">
+    <input type="text" id="team_adres_postal_code" name="team_adres_postal_code" title="Please enter a Zip Code" pattern="^\s*?\d{5}(?:[-\s]\d{4})?\s*?$">
     <br>
     <br>
     <label for="team_phone">Numer telefonu:</label>
     <input type="text" id="team_phone" name="team_phone" required>
+    <br>
+    <br>
+    <label for="start_hour">Godzina otwarcia:</label>
+    <input type="number" id="start_hour" name="start_hour" required>
+    <br>
+    <br>
+    <label for="end_hour">Godzina zamknięcia:</label>
+    <input type="number" id="end_hour" name="end_hour" required>
     <br>
     <br>
     <button type="submit">Utwórz Zespół</button>
@@ -48,15 +65,17 @@
     <p style="color: red;">{{ error_message }}</p>
 {% endif %}
 
-{% if team_names %}
+{% if team_data %}
     <ul>
-        {% for team_name in team_names %}
-            <li><a href="{{ url_for('team_main_page', team_name=team_name) }}">{{ team_name }}</a></li>
+        {% for team in team_data %}
+            <li><a href="{{ url_for('team_main_page', team_name=team['name'], team_uid=team['uid']) }}">{{ team['name'] }}</a></li>
         {% endfor %}
     </ul>
 {% else %}
     <p>Brak utworzonych zespołów.</p>
 {% endif %}
+<br>
+<a href="{{ url_for('employer_main_page') }}">Strona główna</a>
 
 <!-- ... -->
 

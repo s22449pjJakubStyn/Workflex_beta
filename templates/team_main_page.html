@@ -3,19 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ team_name }} - Strona zespołu</title>
+    <script src="../static/script/search_script.js" defer></script>
+</head>
 </head>
 <body>
 <h1>Witaj na stronie zespołu {{ team_name }}</h1>
 <!-- Tutaj możesz dodać inne informacje o zespole -->
 <a href="/employer_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<form id="searchForm">
+    <label for="global_search_query">Wyszukaj pracowników:</label>
+    <input type="text" id="global_search_query" name="query" required>
+</form>
+
+<!-- Wyświetl wyniki na bieżącej stronie -->
+<div id="searchResults"></div>
 <br>
 <a href="{{ url_for('teams') }}">< Wszystkie zespoły</a>
 <br>
 <a href="#"> Harmonogram</a>
 <br>
-<a href="#"> Ustawienia zespołu</a>
+<a href="{{ url_for('team_setings', team_name=team_name, team_uid=team_uid) }}"> Ustawienia zespołu</a>
 <br>
-<a href="#">Pracownicy</a>
+<a href="{{ url_for('team_employees', team_name=team_name, team_uid=team_uid) }}">Pracownicy</a>
+
 <br>
+
 </body>
 </html>

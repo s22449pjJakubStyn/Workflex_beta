@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ team_name }} - Strona zespołu</title>
+    <script src="../static/script/search_script.js" defer></script>
+</head>
+<body>
+<h1>Witaj na stronie zespołu {{ team_name }}</h1>
+<a href="/employee_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<br>
+<a href="{{ url_for('employees_teams') }}"> < Powrót do wszystkich zespołów</a> <br>
+<a href="#"> Harmonogram</a>
+<br>
+<a href="{{ url_for('employee_preferences', team_name=team_name, team_uid=team_uid) }}"> Preferencje pracy</a>
+<br>
+<p><a href="{{ url_for('employees_team_information', team_name=team_name, team_uid=team_uid) }}">Informacje o zespole</a></p>
+<br>
+</body>
+</html>

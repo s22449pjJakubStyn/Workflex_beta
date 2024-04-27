@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ustawienia firmy </title>
+</head>
+<body>
+<a href="/employee_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
+                                   height="80"></a>
+
+{# Wyświetlanie błędu #}
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<h1>Dane osobowe firmy</h1>
+
+{# Formularz do aktualizacji danych zespołu #}
+<form method="post">
+
+    <label for="name">Nazwa firmy:</label>
+    <input type="text" id="name" name="name" value="{{ employer_data['first_name'] }}"><br><br>
+
+
+    <label for="phone">Numer telefonu:</label>
+    <input type="text" id="phone" name="phone" value="{{ employer_data['phone'] }}"><br><br>
+
+    <label for="status">Status:</label>
+    <input type="text" id="status" name="status" value="{{ employer_data['status'] }}"><br><br>
+
+    <input type="submit" value="Zapisz zmiany">
+</form>
+
+
+<br>
+
+<a href="{{ url_for('employer_main_page') }}">< Powrót na stronę główną</a>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Twoje preferencje</title>
+    <script src="../static/script/search_script.js" defer></script>
+</head>
+<body>
+<h1>Twoje preferencje</h1>
+<a href="/employee_main_page"><img src="../../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<br>
+<a href="{{ url_for('employee_teams_main_page', team_name=team_name, team_uid=team_uid) }}"> < Powrót do strony zespołu</a>
+<br>
+ {% if error_message %}
+        <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post">
+        <label for="min_shift_length">Minimalna długość zmiany:</label>
+        <input type="text" id="min_shift_length" name="min_shift_length" value="{{ preferences_data.MinShiftLength }}"><br>
+
+        <label for="max_shift_length">Maksymalna długość zmiany:</label>
+        <input type="text" id="max_shift_length" name="max_shift_length" value="{{ preferences_data.MaxShiftLength }}"><br>
+
+        <input type="submit" value="Zapisz zmiany">
+    </form>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Twoje zespoły</title>
+</head>
+<body>
+<a href="/employee_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
+                                   height="80"></a>
+<br>
+<a href="{{ url_for('employee_main_page') }}"> < Powrót na stronę główną</a> <br>
+{# Wyświetlanie błędu #}
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<h1>Twoje zespoły</h1>
+
+{# Wyświetlanie listy zespołów #}
+{% if team_data %}
+    <ul>
+        {% for team in team_data %}
+            <li><a href="{{ url_for('employee_teams_main_page', team_name=team['name'], team_uid=team['uid']) }}">{{ team['name'] }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Nie należysz do żadnego zespołu</p>
+{% endif %}
+
+</body>
+</html>

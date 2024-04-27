@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ team_name }} - Szczegóły pracownika</title>
+</head>
+<body>
+<h1>Szczegóły pracownika {{ employee_data['first_name'] }} {{ employee_data['last_name'] }}</h1>
+<br>
+<a href="/employer_main_page"><img src="../../../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+<br>
+<form id="searchForm">
+    <label for="global_search_query">Wyszukaj pracowników:</label>
+    <input type="text" id="global_search_query" name="query" required>
+</form>
+<br>
+<a href="{{ url_for('team_employees', team_name=team_name, team_uid=team_uid) }}">< Powrót do wszystkich pracowników</a>
+<br>
+{% if employee_data %}
+    <p>Imię: {{ employee_data['first_name'] }}</p>
+    <p>Nazwisko: {{ employee_data['last_name'] }}</p>
+    <p>Email: {{ employee_data['email'] }}</p>
+    <p>Numer telefonu: {{ employee_data['phone'] }}</p>
+    <p>Status: {{ employee_data['status'] }}</p>
+{% else %}
+    <p>Brak danych pracownika.</p>
+{% endif %}
+<br>
+<a href="{{ url_for('team_employees_preferences', team_name=team_name, team_uid=team_uid, employee_name=employee_data['first_name'], employee_id=employee_data['user_id']) }}">Preferencje</a>
+</body>
+</html>

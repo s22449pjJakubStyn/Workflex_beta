@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pracownicy zespołu</title>
+</head>
+<body>
+<a href="/employer_main_page"><img src="../../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
+                                   height="80"></a>
+
+{# Wyświetlanie błędu #}
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<h1>Pracownicy zespołu {{ team_name }}</h1>
+
+{# Sprawdź, czy są pracownicy w tym zespole #}
+{% if employees_data %}
+    <ul>
+        {% for employee in employees_data %}
+            <li><a href="{{ url_for('team_employees_main_page', team_name=team_name, team_uid=team_uid, employee_name=employee['first_name'], employee_id=employee['user_id']) }}">{{ employee['first_name'] }} {{ employee['last_name'] }}, {{ employee['email'] }}</a></li>
+
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Brak pracowników w tym zespole.</p>
+{% endif %}
+<br>
+<a href="{{ url_for('team_main_page', team_name=team_name, team_uid=team_uid) }}">Strona zespołu</a>
+
+</body>
+</html>

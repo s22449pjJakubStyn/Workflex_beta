@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Twój Kalendarz</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+<h1>Twój kalendarz</h1>
+<button id="addTimeBlockBtn">Dodaj blok czasowy</button>
+
+<!-- Dodaj formularz do ukrycia na początku -->
+<form id="timeBlockForm" style="display: none;" method="POST" action="/create_time_block">
+    <label for="start_date">Data rozpoczęcia:</label>
+    <input type="date" id="start_date" name="start_date" required>
+    <br>
+    <label for="start_time">Godzina rozpoczęcia:</label>
+    <input type="time" id="start_time" name="start_time" required>
+    <br>
+    <label for="end_time">Godzina zakończenia:</label>
+    <input type="time" id="end_time" name="end_time" required>
+    <br>
+    <label for="event_description">Opis wydarzenia:</label>
+    <input type="text" id="event_description" name="event_description" required>
+    <br>
+    <label for="repeat_event">Czy się powtarza?</label>
+    <select id="repeat_event" name="repeat_event">
+        <option value="false">Nie</option>
+        <option value="true">Tak</option>
+    </select>
+    <label id="repeat_options" style="display: none;">
+        <input type="checkbox" id="daily" name="repeat_options[]" value="daily"> Codziennie<br>
+        <input type="checkbox" id="weekly" name="repeat_options[]" value="weekly"> Tygodniowo<br>
+        <input type="checkbox" id="monthly" name="repeat_options[]" value="monthly"> Miesięcznie<br>
+    </label>
+    <br>
+    <button type="submit">Zapisz</button>
+</form>
+
+
+<!-- Dodaj skrypt JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const addTimeBlockBtn = document.getElementById('addTimeBlockBtn');
+    const timeBlockForm = document.getElementById('timeBlockForm');
+    const repeatEventSelect = document.getElementById('repeat_event');
+    const repeatOptionsDiv = document.getElementById('repeat_options');
+    const saveTimeBlockBtn = document.getElementById('saveTimeBlockBtn');
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+
+    // Po kliknięciu na przycisk "Dodaj blok czasowy"
+    addTimeBlockBtn.addEventListener('click', function () {
+        // Pokaż formularz
+        timeBlockForm.style.display = 'block';
+    });
+
+    // Po zmianie wartości w polu "Czy się powtarza?"
+    repeatEventSelect.addEventListener('change', function () {
+        if (repeatEventSelect.value === 'true') {
+            repeatOptionsDiv.style.display = 'block';
+        } else {
+            repeatOptionsDiv.style.display = 'none';
+        }
+    });
+
+    // Po kliknięciu na przycisk "Zapisz"
+    saveTimeBlockBtn.addEventListener('click', function () {
+        // Pobierz wartości z pól formularza
+        var startTime = startTimeInput.value;
+        var endTime = endTimeInput.value;
+
+        // Sprawdź, czy pola nie są puste
+        if (!startTime || !endTime) {
+            alert('Proszę wprowadzić godzinę rozpoczęcia i zakończenia.');
+            return;
+        }
+
+        // Przekształć wartości czasu na obiekty Date
+        var startTimeObj = new Date('1970-01-01T' + startTime);
+        var endTimeObj = new Date('1970-01-01T' + endTime);
+
+        // Sprawdź, czy godzina zakończenia jest większa niż godzina rozpoczęcia
+        if (endTimeObj <= startTimeObj) {
+            alert('Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.');
+            return; // Przerwij działanie funkcji, nie zapisuj danych
+        }
+
+        // Tutaj możesz wykonać akcję zapisu danych, np. wysłać je do serwera
+        // ...
+
+        // Ukryj formularz po zapisaniu
+        timeBlockForm.style.display = 'none';
+    });
+});
+
+
+</script>
+</body>
+</html>

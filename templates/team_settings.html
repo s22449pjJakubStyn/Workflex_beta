@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ustawienia zespołu {{ team_name }} </title>
+</head>
+<body>
+<a href="/employer_main_page"><img src="../../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
+                                   height="80"></a>
+
+{# Wyświetlanie błędu #}
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<h1>Ustawienia zespołu {{ team_name }}</h1>
+
+{# Formularz do aktualizacji danych zespołu #}
+<form method="post">
+    <label for="team_name">Nazwa zespołu:</label>
+    <input type="text" id="team_name" name="team_name" value="{{ team_data['TeamName'] }}"><br><br>
+
+    <label for="team_acronim">Akronim zespołu:</label>
+    <input type="text" id="team_acronim" name="team_acronim" value="{{ team_data['TeamAcronim'] }}"><br><br>
+
+
+    <label for="team_description">Opis zespołu:</label>
+    <textarea id="team_description" name="team_description">{{ team_data['TeamDescription'] }}</textarea><br><br>
+
+    <label for="team_phone_number">Numer telefonu:</label>
+    <input type="text" id="team_phone_number" name="team_phone_number" value="{{ team_data['TeamPhoneNumber'] }}"><br><br>
+
+    <label for="team_city_address">Adres (miejscowość):</label>
+    <input type="text" id="team_city_address" name="team_city_address" value="{{ team_data['TeamCityAddress'] }}"><br><br>
+
+    <label for="team_street_address">Adres (ulica):</label>
+    <input type="text" id="team_street_address" name="team_street_address"
+           value="{{ team_data['TeamStreetAdress'] }}"><br><br>
+
+    <label for="team_postal_code_address">Adres (kod pocztowy):</label>
+    <input type="text" id="team_postal_code_address" name="team_postal_code_address"
+           value="{{ team_data['TeamPostalCodeAddress'] }}"><br><br>
+
+    <label for="team_start_shift_hour">Godziny pracy (od):</label>
+    <input type="text" id="team_start_shift_hour" name="team_start_shift_hour"
+           value="{{ team_data['TeamStartShiftHour'] }}"><br><br>
+
+    <label for="team_end_shift_hour">Godziny pracy (do):</label>
+    <input type="text" id="team_end_shift_hour" name="team_end_shift_hour"
+           value="{{ team_data['TeamEndShiftHour'] }}"><br><br>
+
+    <input type="submit" value="Zapisz zmiany">
+</form>
+
+
+<br>
+
+<a href="{{ url_for('team_main_page', team_name=team_name, team_uid=team_uid) }}">Strona zespołu</a>
+
+</body>
+</html>

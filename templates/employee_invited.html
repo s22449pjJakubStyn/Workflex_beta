@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zaproszenie do Zespołów</title>
+</head>
+<body>
+    <h1>Zaproszenie do Zespołów</h1>
+
+    <p>Witaj, {{ employee.email }}!</p>
+
+    <p>Zostałeś zaproszony do dołączenia do zespołów w naszej firmie.</p>
+
+    <p>Prosimy o potwierdzenie udziału i dostęp do swojego konta, aby zobaczyć szczegóły zaproszenia.</p>
+
+    <p>Dziękujemy!</p>
+
+    <!-- Możesz dodać dodatkowe informacje lub linki, które uznasz za stosowne -->
+
+    <!-- Link do powrotu do poprzedniej strony lub strony głównej -->
+    <a href="{{ url_for('home') }}">Powrót do strony głównej</a>
+</body>
+</html>

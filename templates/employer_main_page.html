@@ -3,11 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Strona główna</title>
+    <script src="../static/script/search_script.js" defer></script>
 </head>
 <body>
     <h2>Strona główna</h2>
-    <p>Witaj firmo {{ user.email }}</p>
-    <a href="/teams">Twoje zespoły</a>
-    <a href="/logout">Wyloguj</a>
+    <a href="/employer_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80" height="80"></a>
+    <form id="searchForm">
+    <label for="global_search_query">Wyszukaj pracowników:</label>
+    <input type="text" id="global_search_query" name="query" required>
+</form>
+
+<!-- Wyświetl wyniki na bieżącej stronie -->
+<div id="searchResults"></div>
+<br>
+    <p>Witaj firmo {{ user.email }}</p><br>
+    <a href="/teams">Twoje zespoły</a><br>
+    <a href="/employer_settings">Ustawienia</a><br>
+    <a href="/logout">Wyloguj</a><br>
 </body>
 </html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Informacje o zespole pracownika</title>
+</head>
+<body>
+<a href="/employee_main_page"><img src="../../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
+                                   height="80"></a>
+<br>
+<a href="{{ url_for('employee_teams_main_page', team_name=team_name, team_uid=team_uid) }}"> < Powrót do strony zespołu</a>
+{# Wyświetlanie błędu #}
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<h1>Informacje o zespole pracownika</h1>
+
+{# Wyświetlanie informacji o zespole #}
+{% if team_data %}
+    <p>Nazwa zespołu: {{ team_data['name'] }}</p>
+    <p>Akronim zespołu: {{ team_data.get('acronim', 'Brak danych') }}</p>
+    <p>Adres (miasto) zespołu: {{ team_data.get('city', 'Brak danych') }}</p>
+    <p>Adres (ulica) zespołu: {{ team_data.get('street', 'Brak danych') }}</p>
+    <p>Kod pocztowy zespołu: {{ team_data.get('postal_code', 'Brak danych') }}</p>
+    <p>Opis zespołu: {{ team_data.get('description', 'Brak danych') }}</p>
+    <p>Telefon zespołu: {{ team_data.get('phone', 'Brak danych') }}</p>
+    <p>Początek zmiany: {{ team_data.get('start', 'Brak danych') }}</p>
+    <p>Koniec zmiany: {{ team_data.get('end', 'Brak danych') }}</p>
+{% else %}
+    <p>Nie należysz do żadnego zespołu</p>
+{% endif %}
+
+</body>
+</html>

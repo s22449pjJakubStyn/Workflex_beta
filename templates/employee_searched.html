@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Searched</title>
+</head>
+<body>
+    <h1>Employee Searched: {{ employee_data.email }}</h1>
+
+    <!-- Wyświetl pozostałe dane pracownika -->
+    <p>Imię: {{ employee_data.first_name }}</p>
+    <p>Nazwisko: {{ employee_data.last_name }}</p>
+    <p>Numer telefonu: {{ employee_data.phone }}</p>
+
+<!-- Formularz do wybierania zespołów -->
+<form method="POST" action="{{ url_for('employee_searched', employee_uid=employee_data.employee_uid) }}">
+    <label>Wybierz zespoły:</label>
+    {% for team_name in team_names %}
+        <div>
+            <input type="checkbox" name="teams" value="{{ team_name }}">
+            <label>{{ team_name }}</label>
+        </div>
+    {% endfor %}
+    <input type="hidden" name="invite_action" value="true">  <!-- Dodajmy ukryte pole oznaczające akcję zaproszenia -->
+    <button type="submit">Zaproś</button>
+</form>
+
+
+
+    <!-- Link do powrotu do poprzedniej strony -->
+    <a href="{{ url_for('teams') }}">Powrót do zespołów</a>
+
+
+</body>
+</html>
