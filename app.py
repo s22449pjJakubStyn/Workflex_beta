@@ -246,17 +246,11 @@ def login_employer():
 
 # Funkcje pomocnicze sprawdzające rolę użytkownika
 def is_employee(email):
-    # Sprawdź, czy email należy do pracownika w Firebase (np. w kolekcji "Employee")
-    # Zwróć True, jeśli należy do pracownika, w przeciwnym razie False
-    # Poniżej znajdziesz przykładową implementację, którą trzeba dostosować do swojej bazy danych
     employee_docs = db.collection('Employee').where('email', '==', email).stream()
     return any(employee.exists for employee in employee_docs)
 
 
 def is_employer(email):
-    # Sprawdź, czy email należy do pracownika w Firebase (np. w kolekcji "Employee")
-    # Zwróć True, jeśli należy do pracownika, w przeciwnym razie False
-    # Poniżej znajdziesz przykładową implementację, którą trzeba dostosować do swojej bazy danych
     employer_docs = db.collection('Company').where('email', '==', email).stream()
     return any(employer.exists for employer in employer_docs)
 
@@ -683,9 +677,9 @@ def employee_searched(employee_uid):
         teams_ref = db.collection('Company').document(employer_uid).collection('Workplace')
         teams = teams_ref.stream()
 
-        team_names = sorted([team.to_dict().get('Team name') for team in teams if
-                             team.exists and team.to_dict().get('Team name') and team.to_dict().get(
-                                 'Team name') != 'default'])
+        team_names = sorted([team.to_dict().get('TeamName') for team in teams if
+                             team.exists and team.to_dict().get('TeamName') and team.to_dict().get(
+                                 'TeamName') != 'default'])
 
         # Przekazujemy dane pracownika i zespoły do szablonu
         return render_template('employee_searched.html', employee_data=employee_data, team_names=team_names)

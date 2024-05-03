@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ team_name }} - Szczegóły pracownika</title>
+    <script src="../../static/script/search_script.js" defer></script>
 </head>
 <body>
 <h1>Szczegóły pracownika {{ employee_data['first_name'] }} {{ employee_data['last_name'] }}</h1>
@@ -14,6 +15,8 @@
     <input type="text" id="global_search_query" name="query" required>
 </form>
 <br>
+<!-- Wyświetl wyniki na bieżącej stronie -->
+<div id="searchResults"></div> <br> <br>
 <a href="{{ url_for('team_employees', team_name=team_name, team_uid=team_uid) }}">< Powrót do wszystkich pracowników</a>
 <br>
 {% if employee_data %}

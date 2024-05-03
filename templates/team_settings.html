@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ustawienia zespołu {{ team_name }} </title>
+    <script src="../../static/script/search_script.js" defer></script>
 </head>
 <body>
 <a href="/employer_main_page"><img src="../../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
@@ -13,7 +14,15 @@
     <p style="color: red;">{{ error_message }}</p>
 {% endif %}
 
-<h1>Ustawienia zespołu {{ team_name }}</h1>
+<h1>Ustawienia zespołu {{ team_name }}</h1> <br>
+
+<form id="searchForm">
+    <label for="global_search_query">Wyszukaj pracowników:</label>
+    <input type="text" id="global_search_query" name="query" required>
+</form>
+<br>
+<!-- Wyświetl wyniki na bieżącej stronie -->
+<div id="searchResults"></div> <br> <br>
 
 {# Formularz do aktualizacji danych zespołu #}
 <form method="post">

@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Ustawienia firmy </title>
+    <script src="../static/script/search_script.js" defer></script>
 </head>
 <body>
-<a href="/employee_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
-                                   height="80"></a>
+<a href="/employer_main_page"><img src="../static/img/logo.PNG" alt="logo" class="company-logo" width="80"
+                                   height="80"></a><br>
+<form id="searchForm">
+    <label for="global_search_query">Wyszukaj pracowników:</label>
+    <input type="text" id="global_search_query" name="query" required>
+</form>
+<br>
+<!-- Wyświetl wyniki na bieżącej stronie -->
+<div id="searchResults"></div> <br> <br>
 
 {# Wyświetlanie błędu #}
 {% if error_message %}
