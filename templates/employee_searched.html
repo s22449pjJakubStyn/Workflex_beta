@@ -23,7 +23,7 @@
     <p>Numer telefonu: {{ employee_data.phone }}</p>
 
 <!-- Formularz do wybierania zespołów -->
-<form method="POST" action="{{ url_for('employee_searched', employee_uid=employee_data.employee_uid) }}">
+<form method="POST" action="/invite_employee/{{ employee_data.user_id }}">
     <label>Wybierz zespoły:</label>
     {% for team_name in team_names %}
         <div>
@@ -31,9 +31,10 @@
             <label>{{ team_name }}</label>
         </div>
     {% endfor %}
-    <input type="hidden" name="invite_action" value="true">  <!-- Dodajmy ukryte pole oznaczające akcję zaproszenia -->
+    <!-- Dodajmy ukryte pole oznaczające akcję zaproszenia -->
     <button type="submit">Zaproś</button>
 </form>
+
 
 
 

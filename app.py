@@ -12,6 +12,10 @@ import mail as mail
 
 from flask_mail import Message, Mail
 
+from datetime import datetime, timedelta, time
+
+import copy
+
 # Inicjalizacja aplikacji Flask
 app = Flask(__name__)
 
@@ -370,6 +374,8 @@ def create_teams():
                 })
                 employess_ref = doc_ref.collection('Employess').document('default')
                 employess_ref.set({})
+                demands_ref = doc_ref.collection('Demands').document('default')
+                demands_ref.set({})
                 app.logger.info("Team created: %s", team_name)  # Dodaj ten log
 
                 return redirect(url_for('teams'))
@@ -564,6 +570,108 @@ def team_setings(team_name, team_uid=None):
                            error_message=error_message)
 
 
+@app.route('/team/<team_name>?<team_uid>/demands')
+@login_required
+def employer_demands(team_name, team_uid=None):
+    return render_template('employer_demands_main_page.html', team_name=team_name, team_uid=team_uid)
+
+
+@app.route('/create_demand', methods=['POST'])
+@login_required
+def create_demand():
+    if request.method == 'POST':
+        try:
+            # Pobierz dane z formularza
+            team_name = request.form.get('team_name')
+            team_uid = request.form.get('team_uid')
+            start_date = request.form.get('start_date')
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            how_many_workers = int(request.form.get('how_many_workers'))
+            repeat_options = request.form.getlist('repeat_options[]')
+
+            # Zapisz dane zapotrzebowania do bazy danych
+            employer_uid = session.get('user', {}).get('uid')
+            demands_ref = db.collection('Company').document(employer_uid).collection('Workplace').document(
+                team_uid).collection('Demands')
+            existing_demand = demands_ref.document(start_date).get()
+            if existing_demand.exists:
+                # Dokument już istnieje, pobierz jego dane
+                existing_demand_data = existing_demand.to_dict()
+
+                # Ustaw indeks kolejnego zapotrzebowania na najwyższy istniejący + 1
+                next_demand_index = max([int(key) for key in existing_demand_data.keys() if key.isdigit()] + [0]) + 1
+
+                # Utwórz mapy dla kolejnego zapotrzebowania, ale unikaj kolizji z istniejącymi indeksami
+                for worker_index in range(next_demand_index, next_demand_index + how_many_workers):
+                    # Sprawdź, czy indeks już istnieje
+                    while str(worker_index) in existing_demand_data:
+                        worker_index += 1
+
+                    worker_availability = {str(hour): 'Empty' for hour in
+                                           range(int(start_time.split(':')[0]), int(end_time.split(':')[0]) + 1)}
+                    existing_demand_data[str(worker_index)] = worker_availability
+
+                # Zaktualizuj dokument z nowymi danymi dla bieżącej daty
+                demands_ref.document(start_date).update(existing_demand_data)
+
+                # Jeśli wybrano opcję "Codziennie", zaktualizuj również kolejne 6 dni
+                if 'daily' in repeat_options:
+                    for i in range(1, 7):
+                        next_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=i)).strftime("%Y-%m-%d")
+                        next_existing_demand = demands_ref.document(next_date).get()
+                        if next_existing_demand.exists:
+                            # Użyj istniejących danych i zaktualizuj kolejne dni
+                            next_existing_demand_data = next_existing_demand.to_dict()
+                            for worker_index in range(next_demand_index, next_demand_index + how_many_workers):
+                                # Sprawdź, czy indeks już istnieje
+                                while str(worker_index) in next_existing_demand_data:
+                                    worker_index += 1
+
+                                worker_availability = {str(hour): 'Empty' for hour in
+                                                       range(int(start_time.split(':')[0]),
+                                                             int(end_time.split(':')[0]) + 1)}
+                                next_existing_demand_data[str(worker_index)] = worker_availability
+
+                            # Zaktualizuj dokument z nowymi danymi dla kolejnej daty
+                            demands_ref.document(next_date).update(next_existing_demand_data)
+            else:
+                demand_data = {}
+                for worker_index in range(1, how_many_workers + 1):
+                    worker_availability = {str(hour): 'Empty' for hour in
+                                           range(int(start_time.split(':')[0]), int(end_time.split(':')[0]) + 1)}
+                    demand_data[str(worker_index)] = worker_availability
+
+                # Zapisz dane w dokumencie
+                demands_ref.document(start_date).set(demand_data)
+                if 'daily' in repeat_options:
+                    # Dodaj kolejne 6 dni
+                    for i in range(7):
+                        next_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=i)).strftime("%Y-%m-%d")
+                        next_doc_ref = db.collection('Company').document(employer_uid).collection('Workplace').document(
+                            team_uid).collection('Demands').document(next_date)
+                        demand_data = {}  # Inicjalizuj nowe dane zapotrzebowania dla każdego dokumentu
+
+                        # Utwórz mapy godzin pracy dla pracowników
+                        for worker_index in range(1, how_many_workers + 1):
+                            worker_availability = {str(hour): 'Empty' for hour in range(int(start_time.split(':')[0]),
+                                                                                        int(end_time.split(':')[
+                                                                                                0]) + 1)}
+                            demand_data[str(worker_index)] = worker_availability
+
+                        # Zapisz dane w dokumencie
+                        next_doc_ref.set(demand_data)
+
+            # Przekieruj użytkownika na stronę z zapotrzebowaniami
+            return redirect(url_for('employer_demands', team_name=team_name, team_uid=team_uid))
+        except Exception as e:
+            error_message = str(e)
+            # Obsłuż ewentualny błąd
+            print("Error:", error_message)
+            # Możesz dodać obsługę błędu tutaj, np. wyświetlając komunikat na stronie
+            return redirect(url_for('employer_demands', error_message=error_message))
+
+
 @app.route('/searcher', methods=['GET'])
 @login_required
 def searcher():
@@ -631,42 +739,11 @@ def employer_settings():
                            error_message=error_message)
 
 
-def send_invitation_email(to_email, selected_teams):
-    subject = 'Zaproszenie do zespołów'
-    body = f"Witaj! Zostałeś zaproszony do zespołów: {', '.join(selected_teams)}."
-
-    msg = Message(subject=subject, recipients=[to_email], body=body)
-    mail.send(msg)
-
-
-# Endpoint employee_searched z dodaną funkcją wysyłania e-maila
-# Endpoint employee_searched z bezpośrednim wysłaniem e-maila
-@app.route('/employee_searched/<employee_uid>', methods=['GET', 'POST'])
+# Endpoint do wyświetlania strony employee_searched.html
+@app.route('/employee_searched/<employee_uid>', methods=['GET'])
 @login_required
-def employee_searched(employee_uid):
+def display_employee_searched(employee_uid):
     try:
-        if request.method == 'POST':
-            print("Endpoint 'employee_searched' został wywołany po kliknięciu przycisku.")
-
-            # Jeśli formularz został wysłany, pobierz dane z formularza (zespoły, do których zaprosić pracownika)
-            selected_teams = request.form.getlist('teams')
-
-            # Tutaj możesz wykonać odpowiednie akcje, np. zapisując wybrane zespoły w bazie danych
-            # ...
-
-            # Pobierz dane pracownika z bazy danych
-            employee_ref = db.collection('Employee').document(employee_uid)
-            employee_data = employee_ref.get().to_dict()
-
-            # Wyślij zaproszenie e-mailowe
-            subject = 'Zaproszenie do zespołów'
-            body = f"Witaj! Zostałeś zaproszony do zespołów: {', '.join(selected_teams)}."
-            msg = Message(subject=subject, recipients=[employee_data['email']], body=body)
-            mail.send(msg)
-
-            # Przekieruj użytkownika z powrotem do strony z danymi pracownika
-            return redirect(url_for('employee_invited', employee_uid=employee_uid))
-
         # Pobierz dane pracownika z bazy danych
         employee_ref = db.collection('Employee').document(employee_uid)
         employee_data = employee_ref.get().to_dict()
@@ -690,12 +767,32 @@ def employee_searched(employee_uid):
         return jsonify({'error': error_message})
 
 
-@app.route('/employee_invited/<employee_uid>', methods=['GET'])
-@login_required
-def employee_invited(employee_uid):
-    app.logger.info("Endpoint 'employee_invited' został odwiedzony.")
-    # Tutaj możesz dodać logikę dla strony, na którą użytkownik zostanie przekierowany po wysłaniu zaproszenia
-    return render_template('employee_invited.html', employee_uid=employee_uid)
+# Endpoint do obsługi formularza
+@app.route('/invite_employee/<employee_uid>', methods=['GET', 'POST'])
+def invite_employee(employee_uid):
+    try:
+        if request.method == 'POST':
+            # Pobierz dane pracodawcy z bazy danych
+            employer_uid = session.get('user', {}).get('uid')
+            employer_ref = db.collection('Company').document(employer_uid)
+            employer_data = employer_ref.get().to_dict()
+
+            # Pobierz dane pracownika z bazy danych
+            employee_ref = db.collection('Employee').document(employee_uid)
+            employee_data = employee_ref.get().to_dict()
+
+            # Wyślij zaproszenie e-mailowe
+            msg = Message('Zaproszenie do zespołów', sender=app.config['MAIL_USERNAME'], recipients=[employee_data['email']])
+            msg.body = f'Witaj! Zostałeś zaproszony przez {employer_data["email"]} do zespołów.'
+            mail.send(msg)
+
+            # Przekieruj użytkownika z powrotem do strony z danymi pracownika
+            return redirect(url_for('display_employee_searched', employee_uid=employee_uid))
+
+    except Exception as e:
+        error_message = str(e)
+        app.logger.error("Error during employee invitation: %s", error_message)
+        return jsonify({'error': error_message})
 
 
 @app.route('/employees_teams', methods=['GET', 'POST'])
@@ -734,7 +831,6 @@ def employees_teams():
 @app.route('/employee_team/<team_name>?<team_uid>')
 @login_required
 def employee_teams_main_page(team_name, team_uid=None):
-
     return render_template('employee_teams_main_page.html', team_name=team_name, team_uid=team_uid)
 
 
@@ -776,7 +872,8 @@ def employees_team_information(team_name, team_uid=None):
         error_message = str(e)
         print(f"Error retrieving data: {e}")
 
-    return render_template('employees_team_information.html', team_data=team_data, team_name=team_name, team_uid=team_uid,
+    return render_template('employees_team_information.html', team_data=team_data, team_name=team_name,
+                           team_uid=team_uid,
                            error_message=error_message)
 
 
@@ -819,7 +916,8 @@ def employee_preferences(team_name, team_uid=None):
     except Exception as e:
         error_message = str(e)
 
-    return render_template('employee_team_preferences.html', preferences_data=preferences_data, team_name=team_name, team_uid=team_uid,
+    return render_template('employee_team_preferences.html', preferences_data=preferences_data, team_name=team_name,
+                           team_uid=team_uid,
                            error_message=error_message)
 
 
@@ -829,45 +927,111 @@ def employee_calendar():
     return render_template('employee_calendar_main_page.html')
 
 
-@app.route('/create_time_block', methods=['GET', 'POST'])
-@login_required
+@app.route('/create_time_block', methods=['POST'])
 def create_time_block():
-    error_message = None
-    # time_block = []  # Zainicjuj pustą listę
-
     if request.method == 'POST':
-        app.logger.debug("Request received for /create_time_block")  # Dodaj log debugowania
-        start_date = request.form.get('start_date')
-        start_time = request.form.get('start_time')
-        end_time = request.form.get('end_time')
-        event_description = request.form.get('event_description')
-        repeat_event = request.form.get('repeat_event')
-        repeat_options = request.form.getlist('repeat_options[]')
-        if repeat_options:
-            repeating = ', '.join(repeat_options)
-        else:
-            repeating = None  # Lub inna wartość, jeśli nie ma zaznaczonych opcji
         try:
+            # Pobierz dane z formularza
+            start_date = request.form.get('start_date')
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            event_description = request.form.get('event_description')
+            repeat_options = request.form.getlist('repeat_options[]')
+
+            # Utwórz lub zaktualizuj dokument w kolekcji Employee>Calendar>start_date
+            # i zapisz listę zadan pod daną godziną
             employee_uid = session.get('user', {}).get('uid')
-            block_id = start_date
+            doc_ref = db.collection('Employee').document(employee_uid).collection('Calendar').document(start_date)
 
-            doc_ref = db.collection('Employee').document(employee_uid).collection('Calendar').document(block_id)
-            doc_ref.set({
-                'Start date': start_date,
-                'Start time': start_time,
-                'End time': end_time,
-                'Event description': event_description,
-                'Is repeating?': repeat_event,
-                'Repeating': repeating,
-            })
-            app.logger.info("Time block created: %s", start_date)  # Dodaj ten log
+            # Sprawdź, czy dokument istnieje
+            if doc_ref.get().exists:
+                # Dokument istnieje, zwróć formularz potwierdzenia
+                return render_template('confirmation_form.html', start_date=start_date, start_time=start_time,
+                                       end_time=end_time, event_description=event_description,
+                                       repeat_options=repeat_options)
+            else:
+                # Dokument nie istnieje, użyj .set()
+                doc_ref.set({})
 
+                # Następnie dodaj pola dla każdej godziny od start_time do end_time
+                current_time = datetime.strptime(start_time, "%H:%M")
+                end_datetime = datetime.strptime(end_time, "%H:%M")
+                while current_time <= end_datetime:
+                    # Tworzymy nazwę pola na podstawie godziny
+                    field_name = f"{current_time.hour}"
+                    # Dodajemy pole do dokumentu
+                    doc_ref.update({field_name: event_description})
+                    # Przechodzimy do następnej godziny
+                    current_time += timedelta(hours=1)
+
+                # Sprawdź, czy powtarza się codziennie
+                if 'daily' in repeat_options:
+                    # Dodaj kolejne 6 dni
+                    for i in range(1, 7):
+                        next_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=i)).strftime("%Y-%m-%d")
+                        next_doc_ref = db.collection('Employee').document(employee_uid).collection('Calendar').document(
+                            next_date)
+                        next_doc_ref.set({})
+                        # Utwórz nowy blok czasowy dla każdego dnia
+                        current_time = datetime.strptime(start_time, "%H:%M")
+                        end_datetime = datetime.strptime(end_time, "%H:%M")
+                        while current_time <= end_datetime:
+                            field_name = f"{current_time.hour}"
+                            next_doc_ref.update({field_name: event_description})
+                            current_time += timedelta(hours=1)
+
+            # Przekieruj użytkownika na stronę kalendarza
             return redirect(url_for('employee_calendar'))
         except Exception as e:
             error_message = str(e)
-            app.logger.error("Error while creating time block: %s", error_message)
+            # Obsłuż ewentualny błąd
+            print("Error:", error_message)
+            return redirect(url_for('employee_calendar'))
 
-    return render_template('employee_calendar_main_page.html', error_message=error_message)
+
+@app.route('/confirm_update', methods=['POST'])
+def confirm_update():
+    if request.method == 'POST':
+        try:
+            # Pobierz dane z formularza potwierdzenia
+            start_date = request.form.get('start_date')
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            event_description = request.form.get('event_description')
+            repeat_options = request.form.get('repeat_options')
+            employee_uid = session.get('user', {}).get('uid')
+            doc_ref = db.collection('Employee').document(employee_uid).collection('Calendar').document(start_date)
+            # Aktualizuj dane w bazie danych
+            current_time = datetime.strptime(start_time, "%H:%M")
+            end_datetime = datetime.strptime(end_time, "%H:%M")
+            while current_time <= end_datetime:
+                # Tworzymy nazwę pola na podstawie godziny
+                field_name = f"{current_time.hour}"
+                # Dodajemy pole do dokumentu
+                doc_ref.update({field_name: event_description})
+                # Przechodzimy do następnej godziny
+                current_time += timedelta(hours=1)
+            if 'daily' in repeat_options:
+                # Dodaj kolejne 6 dni
+                for i in range(1, 7):
+                    next_date = (datetime.strptime(start_date, "%Y-%m-%d") + timedelta(days=i)).strftime("%Y-%m-%d")
+                    next_doc_ref = db.collection('Employee').document(employee_uid).collection('Calendar').document(
+                        next_date)
+                    # Utwórz nowy blok czasowy dla każdego dnia
+                    current_time = datetime.strptime(start_time, "%H:%M")
+                    end_datetime = datetime.strptime(end_time, "%H:%M")
+                    while current_time <= end_datetime:
+                        field_name = f"{current_time.hour}"
+                        next_doc_ref.update({field_name: event_description})
+                        current_time += timedelta(hours=1)
+
+            # Przekieruj użytkownika na stronę kalendarza
+            return redirect(url_for('employee_calendar'))
+        except Exception as e:
+            error_message = str(e)
+            # Obsłuż ewentualny błąd
+            print("Error:", error_message)
+            return redirect(url_for('employee_calendar'))
 
 
 @app.route('/employee_settings', methods=['GET', 'POST'])

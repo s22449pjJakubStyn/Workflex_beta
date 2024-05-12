@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Potwierdzenie aktualizacji</title>
+</head>
+<body>
+    <h1>Potwierdź aktualizację</h1>
+    <p>Czy na pewno chcesz zaktualizować rezerwacje dla daty {{ start_date }} w godzinach od {{ start_time }} do {{ end_time }} na wydarzenie "{{ event_description }}, które powtarza się {{ repeat_options }}"?</p>
+    <form method="POST" action="/confirm_update">
+        <input type="hidden" name="start_date" value="{{ start_date }}">
+        <input type="hidden" name="start_time" value="{{ start_time }}">
+        <input type="hidden" name="end_time" value="{{ end_time }}">
+        <input type="hidden" name="event_description" value="{{ event_description }}">
+        <input type="hidden" name="repeat_options" value="{{ repeat_options }}">
+        <button type="submit">Tak, zaktualizuj</button>
+        <a href="{{ url_for('employee_calendar') }}">Nie, anuluj</a>
+    </form>
+</body>
+</html>
